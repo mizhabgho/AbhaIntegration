@@ -33,20 +33,13 @@ class Program
     private static async Task RunCertABDM()
     {
         Console.WriteLine("🔹 Running CertABDM logic...");
-        string TokenFile = "access_token.txt";
-        string PublicKeyFile = "publickey_token.txt";
         string ApiUrl = "https://abhasbx.abdm.gov.in/abha/api/v3/profile/public/certificate";
 
-        if (!File.Exists(TokenFile))
-        {
-            Console.WriteLine("❌ Error: Access token file not found.");
-            return;
-        }
+        string accessToken = Environment.GetEnvironmentVariable("ACCESS_TOKEN");
 
-        string accessToken = File.ReadAllText(TokenFile).Trim();
         if (string.IsNullOrEmpty(accessToken))
         {
-            Console.WriteLine("❌ Error: Access token is empty.");
+            Console.WriteLine("❌ Error: Access token is missing. Run 'sess' first to obtain it.");
             return;
         }
 
@@ -73,8 +66,11 @@ class Program
                     if (doc.RootElement.TryGetProperty("publicKey", out JsonElement publicKeyElement))
                     {
                         string publicKey = publicKeyElement.GetString();
-                        File.WriteAllText(PublicKeyFile, publicKey);
-                        Console.WriteLine($"✅ Public key saved to {PublicKeyFile}");
+                    
+                        // Save public key as an environment variable
+                        Environment.SetEnvironmentVariable("PUBLIC_KEY", publicKey, EnvironmentVariableTarget.User);
+
+                        Console.WriteLine("✅ Public key saved to environment variable 'PUBLIC_KEY'");
                     }
                     else
                     {
@@ -88,11 +84,10 @@ class Program
     private static async Task RunSessionABDM()
     {
         Console.WriteLine("🔹 Running SessionABDM logic...");
-        string TokenFile = "access_token.txt";
         string AuthUrl = "https://dev.abdm.gov.in/api/hiecm/gateway/v3/sessions";
 
-        string? clientId = Environment.GetEnvironmentVariable("CLIENT_ID");
-        string? clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET");
+        string clientId = Environment.GetEnvironmentVariable("CLIENT_ID") ?? throw new InvalidOperationException("CLIENT_ID environment variable is not set.");
+        string clientSecret = Environment.GetEnvironmentVariable("CLIENT_SECRET") ?? throw new InvalidOperationException("CLIENT_SECRET environment variable is not set.");
 
         if (string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(clientSecret))
         {
@@ -127,8 +122,12 @@ class Program
                 var responseData = JsonConvert.DeserializeObject<dynamic>(responseString);
                 if (responseData?.accessToken != null)
                 {
-                    File.WriteAllText(TokenFile, responseData.accessToken.ToString());
-                    Console.WriteLine($"✅ Access Token saved to {TokenFile}");
+                    string accessToken = responseData.accessToken.ToString();
+
+                    // Save to environment variable
+                    Environment.SetEnvironmentVariable("ACCESS_TOKEN", accessToken, EnvironmentVariableTarget.User);
+
+                    Console.WriteLine("✅ Access Token saved to environment variable 'ACCESS_TOKEN'");
                 }
             }
             else
