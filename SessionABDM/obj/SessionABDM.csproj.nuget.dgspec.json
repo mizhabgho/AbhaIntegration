@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\GitHub\\GHO\\ABDM_Integration\\ABDM_Integration.csproj": {}
+    "C:\\GitHub\\AbhaIntegration\\SessionABDM\\SessionABDM.csproj": {}
   },
   "projects": {
-    "C:\\GitHub\\GHO\\ABDM_Integration\\ABDM_Integration.csproj": {
+    "C:\\GitHub\\AbhaIntegration\\SessionABDM\\SessionABDM.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\GitHub\\GHO\\ABDM_Integration\\ABDM_Integration.csproj",
-        "projectName": "ABDM_Integration",
-        "projectPath": "C:\\GitHub\\GHO\\ABDM_Integration\\ABDM_Integration.csproj",
+        "projectUniqueName": "C:\\GitHub\\AbhaIntegration\\SessionABDM\\SessionABDM.csproj",
+        "projectName": "SessionABDM",
+        "projectPath": "C:\\GitHub\\AbhaIntegration\\SessionABDM\\SessionABDM.csproj",
         "packagesPath": "C:\\Users\\mizh4\\.nuget\\packages\\",
-        "outputPath": "C:\\GitHub\\GHO\\ABDM_Integration\\obj\\",
+        "outputPath": "C:\\GitHub\\AbhaIntegration\\SessionABDM\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mizh4\\AppData\\Roaming\\NuGet\\NuGet.Config"
