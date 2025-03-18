@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\GitHub\\ABDM\\ABDMSessionandcertAPI\\ABDMSessionandcertAPI.csproj": {}
+    "C:\\GitHub\\AbhaIntegration\\ABDMSessionandcertAPI\\ABDMSessionandcertAPI.csproj": {}
   },
   "projects": {
-    "C:\\GitHub\\ABDM\\ABDMSessionandcertAPI\\ABDMSessionandcertAPI.csproj": {
+    "C:\\GitHub\\AbhaIntegration\\ABDMSessionandcertAPI\\ABDMSessionandcertAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\GitHub\\ABDM\\ABDMSessionandcertAPI\\ABDMSessionandcertAPI.csproj",
+        "projectUniqueName": "C:\\GitHub\\AbhaIntegration\\ABDMSessionandcertAPI\\ABDMSessionandcertAPI.csproj",
         "projectName": "ABDMSessionandcertAPI",
-        "projectPath": "C:\\GitHub\\ABDM\\ABDMSessionandcertAPI\\ABDMSessionandcertAPI.csproj",
+        "projectPath": "C:\\GitHub\\AbhaIntegration\\ABDMSessionandcertAPI\\ABDMSessionandcertAPI.csproj",
         "packagesPath": "C:\\Users\\mizh4\\.nuget\\packages\\",
-        "outputPath": "C:\\GitHub\\ABDM\\ABDMSessionandcertAPI\\obj\\",
+        "outputPath": "C:\\GitHub\\AbhaIntegration\\ABDMSessionandcertAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mizh4\\AppData\\Roaming\\NuGet\\NuGet.Config"
