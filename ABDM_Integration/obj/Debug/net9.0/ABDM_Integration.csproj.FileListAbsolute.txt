@@ -1,0 +1,17 @@
+C:\GitHub\GHO\ABDM_Integration\bin\Debug\net9.0\ABDM_Integration.exe
+C:\GitHub\GHO\ABDM_Integration\bin\Debug\net9.0\ABDM_Integration.deps.json
+C:\GitHub\GHO\ABDM_Integration\bin\Debug\net9.0\ABDM_Integration.runtimeconfig.json
+C:\GitHub\GHO\ABDM_Integration\bin\Debug\net9.0\ABDM_Integration.dll
+C:\GitHub\GHO\ABDM_Integration\bin\Debug\net9.0\ABDM_Integration.pdb
+C:\GitHub\GHO\ABDM_Integration\bin\Debug\net9.0\Newtonsoft.Json.dll
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Integration.csproj.AssemblyReference.cache
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Integration.GeneratedMSBuildEditorConfig.editorconfig
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Integration.AssemblyInfoInputs.cache
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Integration.AssemblyInfo.cs
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Integration.csproj.CoreCompileInputs.cache
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Int.47F4FA4A.Up2Date
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Integration.dll
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\refint\ABDM_Integration.dll
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Integration.pdb
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ABDM_Integration.genruntimeconfig.cache
+C:\GitHub\GHO\ABDM_Integration\obj\Debug\net9.0\ref\ABDM_Integration.dll

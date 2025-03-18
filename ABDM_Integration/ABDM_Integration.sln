@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABDM_Integration", "ABDM_Integration.csproj", "{4F4A10D4-32E3-6FB4-2381-247DA487ACD9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4F4A10D4-32E3-6FB4-2381-247DA487ACD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F4A10D4-32E3-6FB4-2381-247DA487ACD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F4A10D4-32E3-6FB4-2381-247DA487ACD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F4A10D4-32E3-6FB4-2381-247DA487ACD9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5C71F9D9-E71C-46D9-A806-B43EE0BC30E2}
+	EndGlobalSection
+EndGlobal
