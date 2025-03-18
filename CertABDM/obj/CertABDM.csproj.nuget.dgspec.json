@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\GitHub\\ABHAINTEGRATION\\SessionABDM\\SessionABDM.csproj": {}
+    "C:\\GitHub\\ABHAINTEGRATION\\CertABDM\\CertABDM.csproj": {}
   },
   "projects": {
-    "C:\\GitHub\\ABHAINTEGRATION\\SessionABDM\\SessionABDM.csproj": {
+    "C:\\GitHub\\ABHAINTEGRATION\\CertABDM\\CertABDM.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\GitHub\\ABHAINTEGRATION\\SessionABDM\\SessionABDM.csproj",
-        "projectName": "SessionABDM",
-        "projectPath": "C:\\GitHub\\ABHAINTEGRATION\\SessionABDM\\SessionABDM.csproj",
+        "projectUniqueName": "C:\\GitHub\\ABHAINTEGRATION\\CertABDM\\CertABDM.csproj",
+        "projectName": "CertABDM",
+        "projectPath": "C:\\GitHub\\ABHAINTEGRATION\\CertABDM\\CertABDM.csproj",
         "packagesPath": "C:\\Users\\mizh4\\.nuget\\packages\\",
-        "outputPath": "C:\\GitHub\\ABHAINTEGRATION\\SessionABDM\\obj\\",
+        "outputPath": "C:\\GitHub\\ABHAINTEGRATION\\CertABDM\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mizh4\\AppData\\Roaming\\NuGet\\NuGet.Config"
