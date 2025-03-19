@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -76,8 +75,8 @@ class Program
 
                 if (!string.IsNullOrEmpty(accessToken))
                 {
-                    File.WriteAllText("access_token.txt", accessToken);
-                    Console.WriteLine("✅ Access Token saved to 'access_token.txt'");
+                    Environment.SetEnvironmentVariable("ACCESS_TOKEN", accessToken, EnvironmentVariableTarget.User);
+                    Console.WriteLine("✅ Access Token saved to environment variable 'ACCESS_TOKEN'");
                 }
             }
             else
@@ -96,7 +95,12 @@ class Program
         Console.WriteLine("🔹 Running CertABDM logic...");
         string ApiUrl = "https://abhasbx.abdm.gov.in/abha/api/v3/profile/public/certificate";
 
-        string accessToken = File.Exists("access_token.txt") ? File.ReadAllText("access_token.txt") : null;
+        // Try reading token from file if environment variable is missing
+        string accessToken = Environment.GetEnvironmentVariable("ACCESS_TOKEN", EnvironmentVariableTarget.User);
+        if (string.IsNullOrEmpty(accessToken) && File.Exists("access_token.txt"))
+        {
+            accessToken = File.ReadAllText("access_token.txt").Trim();
+        }
 
         if (string.IsNullOrEmpty(accessToken))
         {
@@ -111,6 +115,8 @@ class Program
             client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("o"));
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
 
+            Console.WriteLine($"🔹 Using Access Token: {accessToken}");
+
             HttpResponseMessage response = await client.GetAsync(ApiUrl);
             string responseBody = await response.Content.ReadAsStringAsync();
 
@@ -118,14 +124,20 @@ class Program
             Console.WriteLine("Response Body:");
             Console.WriteLine(responseBody);
 
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine("❌ Error: API Request Failed. Check credentials.");
+                return;
+            }
+
             using (JsonDocument doc = JsonDocument.Parse(responseBody))
             {
                 if (doc.RootElement.TryGetProperty("publicKey", out JsonElement publicKeyElement))
-                {
+                {   
                     string publicKey = publicKeyElement.GetString();
-                    File.WriteAllText("public_key.txt", publicKey);
+                    Environment.SetEnvironmentVariable("PUBLIC_KEY", publicKey, EnvironmentVariableTarget.User);
 
-                    Console.WriteLine("✅ Public key saved to 'public_key.txt'");
+                    Console.WriteLine("✅ Public key saved to environment variable 'PUBLIC_KEY'");
                 }
                 else
                 {
