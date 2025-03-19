@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ABHAVerification")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ffaa3abe766cbb00b597781680c9d4af3d7cb299")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+89be6f829e8554b8d11e59b4c1cebcd9022d5a6d")]
 [assembly: System.Reflection.AssemblyProductAttribute("ABHAVerification")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ABHAVerification")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
