@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 class Program
 {
@@ -11,11 +12,10 @@ class Program
     {
         string url = "https://abhasbx.abdm.gov.in/abha/api/v3/profile/login/request/otp";
         
-        // Generate unique request ID and timestamp
-        string requestId = Guid.NewGuid().ToString(); // Generates a new GUID
-        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ"); // ISO 8601 format
+        string requestId = Guid.NewGuid().ToString();
+        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
 
-        string authorizationToken = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE3NDI1MzI5MjQsImlhdCI6MTc0MjUzMTcyNCwianRpIjoiMDQ2MDFjNzAtNzBlMS00MTg1LWI3MTUtMTIyNTk2NmNkYmM5IiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6WyJhY2NvdW50IiwiU0JYVElEXzAwNjU3NiJdLCJzdWIiOiJlNmZhMjIyOC1hNTQ0LTQzYWQtYjYzNi1mZGY1NTU2M2VhMWIiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhJRF8wMDkxMjUiLCJzZXNzaW9uX3N0YXRlIjoiYzVkMjVkZDktZDE0ZC00NzI2LThhMDYtODE3MTA1NDQ5NWJjIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjkwMDciXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIkRJR0lfRE9DVE9SIiwiaGZyIiwiaGl1Iiwib2ZmbGluZV9hY2Nlc3MiLCJoZWFsdGhJZCIsInBociIsIk9JREMiLCJoZWFsdGhfbG9ja2VyIiwiaGlwIiwiSGlkQWJoYVNlYXJjaCIsImhwX2lkIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19LCJTQlhJRF8wMDkxMjUiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sIlNCWFRJRF8wMDY1NzYiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiY2xpZW50SWQiOiJTQlhJRF8wMDkxMjUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImNsaWVudEhvc3QiOiIxMDAuNjUuMTYwLjIxMiIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1zYnhpZF8wMDkxMjUiLCJjbGllbnRBZGRyZXNzIjoiMTAwLjY1LjE2MC4yMTIifQ.N3b2OOPJlphCiinr0Hq1ArIhK_EJPAUyANlrqhnyR-QcJgKXHtfbAIXWs_v1x61fp2OXXwOSamI4kb7hX_A6KOBLiPChTg2ADTElc1KnOSSdpEzA_9E0pC81RlN656bmbawoo2zYiVLT5OiPnsgWr98xWbC6FqXuGieGzGJWtTcIaARn4c8C71sI07IujJnOwKAQ0ExzHs94Hl7G3xXJpK3HF8nSNgY-CxeqRJliow65xRvVqE_Ma8s0e28oAORM8R3LPQPxU3wYnZP0DWR3hjnp3DnSfzEGQM7LLldN0DFrVibpJjLqsPoduf8IA_BEmMY8UEnVkxo3C0Jo0-o9XA"; // Replace with a valid token
+        string authorizationToken = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE3NDI1MzI5MjQsImlhdCI6MTc0MjUzMTcyNCwianRpIjoiMDQ2MDFjNzAtNzBlMS00MTg1LWI3MTUtMTIyNTk2NmNkYmM5IiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6WyJhY2NvdW50IiwiU0JYVElEXzAwNjU3NiJdLCJzdWIiOiJlNmZhMjIyOC1hNTQ0LTQzYWQtYjYzNi1mZGY1NTU2M2VhMWIiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhJRF8wMDkxMjUiLCJzZXNzaW9uX3N0YXRlIjoiYzVkMjVkZDktZDE0ZC00NzI2LThhMDYtODE3MTA1NDQ5NWJjIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjkwMDciXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIkRJR0lfRE9DVE9SIiwiaGZyIiwiaGl1Iiwib2ZmbGluZV9hY2Nlc3MiLCJoZWFsdGhJZCIsInBociIsIk9JREMiLCJoZWFsdGhfbG9ja2VyIiwiaGlwIiwiSGlkQWJoYVNlYXJjaCIsImhwX2lkIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19LCJTQlhJRF8wMDkxMjUiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sIlNCWFRJRF8wMDY1NzYiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiY2xpZW50SWQiOiJTQlhJRF8wMDkxMjUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImNsaWVudEhvc3QiOiIxMDAuNjUuMTYwLjIxMiIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1zYnhpZF8wMDkxMjUiLCJjbGllbnRBZGRyZXNzIjoiMTAwLjY1LjE2MC4yMTIifQ.N3b2OOPJlphCiinr0Hq1ArIhK_EJPAUyANlrqhnyR-QcJgKXHtfbAIXWs_v1x61fp2OXXwOSamI4kb7hX_A6KOBLiPChTg2ADTElc1KnOSSdpEzA_9E0pC81RlN656bmbawoo2zYiVLT5OiPnsgWr98xWbC6FqXuGieGzGJWtTcIaARn4c8C71sI07IujJnOwKAQ0ExzHs94Hl7G3xXJpK3HF8nSNgY-CxeqRJliow65xRvVqE_Ma8s0e28oAORM8R3LPQPxU3wYnZP0DWR3hjnp3DnSfzEGQM7LLldN0DFrVibpJjLqsPoduf8IA_BEmMY8UEnVkxo3C0Jo0-o9XA";
 
         var requestBody = new
         {
@@ -39,6 +39,19 @@ class Program
             string responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine("Response:");
             Console.WriteLine(responseString);
+
+            // Extract txnId and store it in an environment variable
+            var jsonResponse = JObject.Parse(responseString);
+            if (jsonResponse["txnId"] != null)
+            {
+                string txnId = jsonResponse["txnId"].ToString();
+                Environment.SetEnvironmentVariable("TXN_ID", txnId);
+                Console.WriteLine($"Transaction ID stored in environment variable: {txnId}");
+            }
+            else
+            {
+                Console.WriteLine("txnId not found in response.");
+            }
         }
     }
 }
