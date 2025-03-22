@@ -1,59 +1,284 @@
 ﻿using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
+using System.IO;
 using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Security.Cryptography;
+using System.Collections.Generic;
 
 class Program
 {
-    static async Task Main()
+    private static readonly HttpClient client = new HttpClient();
+    static string configFilePath = "config.json";
+
+    static async Task Main(string[] args)
     {
-        string url = "https://abhasbx.abdm.gov.in/abha/api/v3/profile/login/request/otp";
-        
+        if (args.Length == 0)
+        {
+            Console.WriteLine("Usage: dotnet run <command>");
+            return;
+        }
+
+        switch (args[0].ToLower())
+        {
+            case "sendotp":
+                await SendOtp();
+                break;
+            case "verifyotp":
+                await VerifyOtp();
+                break;
+            case "verifyuser":
+                await VerifyUser();
+                break;
+            case "storedata":
+                StoreUserData();
+                break;
+            default:
+                Console.WriteLine("❌ Invalid command");
+                break;
+        }
+    }
+
+    // 📌 Store Encrypted Data in config.json
+    static void StoreUserData()
+    {
+        Console.WriteLine("Select an option:");
+        Console.WriteLine("1. Enter mobile number");
+        Console.WriteLine("2. Enter OTP");
+        Console.WriteLine("3. Enter ABHA number");
+        Console.WriteLine("4. Enter Aadhar number");
+        Console.Write("Choice: ");
+        string choice = Console.ReadLine();
+
+        string publicKey = GetPublicKey();
+
+        if (string.IsNullOrEmpty(publicKey))
+        {
+            Console.WriteLine("❌ Public key not found.");
+            return;
+        }
+
+        Dictionary<string, string> configData = LoadConfig();
+
+        switch (choice)
+        {
+            case "1":
+                Console.Write("Enter mobile number to encrypt: ");
+                string mobile = Console.ReadLine();
+                configData["ENCRYPTED_MOBILE_NUMBER"] = RSAEncrypt(mobile, publicKey);
+                Console.WriteLine("✅ Mobile number encrypted and stored.");
+                break;
+            case "2":
+                Console.Write("Enter OTP to encrypt: ");
+                string otp = Console.ReadLine();
+                configData["ENCRYPTED_OTP"] = RSAEncrypt(otp, publicKey);
+                Console.WriteLine("✅ OTP encrypted and stored.");
+                break;
+            case "3":
+                Console.Write("Enter ABHA number: ");
+                string abha = Console.ReadLine();
+                configData["ABHA_NUMBER"] = abha;
+                Console.WriteLine("✅ ABHA number stored.");
+                break;
+            case "4":
+                Console.Write("Enter Aadhar number: ");
+                string aadhar = Console.ReadLine();
+                configData["AADHAR_NUMBER"] = aadhar;
+                Console.WriteLine("✅ Aadhar number stored.");
+                break;
+            default:
+                Console.WriteLine("❌ Invalid choice.");
+                return;
+        }
+
+        SaveConfig(configData);
+    }
+
+// 📌 Send OTP API Call (Debugging Mode with Hardcoded Access Token)
+    static async Task SendOtp()
+    {
+        Dictionary<string, string> configData = LoadConfig();
+
+        if (!configData.ContainsKey("ENCRYPTED_MOBILE_NUMBER"))
+        {
+            Console.WriteLine("❌ Encrypted mobile number not found in config.json.");
+            return;
+        }
+
+        string encryptedMobile = configData["ENCRYPTED_MOBILE_NUMBER"];
+
+        // 🔥 Hardcoded Access Token (Replace with actual token for debugging)
+        string accessToken = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE3NDI2MjQwMDgsImlhdCI6MTc0MjYyMjgwOCwianRpIjoiYjZhYTA0MGYtODc5Yi00OWEwLWExNWEtM2Q1ODhhNWE1ODZhIiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6WyJhY2NvdW50IiwiU0JYVElEXzAwNjU3NiJdLCJzdWIiOiJlNmZhMjIyOC1hNTQ0LTQzYWQtYjYzNi1mZGY1NTU2M2VhMWIiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhJRF8wMDkxMjUiLCJzZXNzaW9uX3N0YXRlIjoiZDBiNDlkYjUtNTdhYy00YmNkLWJiY2YtMWRiMDRlYzhkNzllIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjkwMDciXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIkRJR0lfRE9DVE9SIiwiaGZyIiwiaGl1Iiwib2ZmbGluZV9hY2Nlc3MiLCJoZWFsdGhJZCIsInBociIsIk9JREMiLCJoZWFsdGhfbG9ja2VyIiwiaGlwIiwiSGlkQWJoYVNlYXJjaCIsImhwX2lkIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19LCJTQlhJRF8wMDkxMjUiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sIlNCWFRJRF8wMDY1NzYiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiY2xpZW50SWQiOiJTQlhJRF8wMDkxMjUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImNsaWVudEhvc3QiOiIxMDAuNjUuMTYwLjIxMiIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1zYnhpZF8wMDkxMjUiLCJjbGllbnRBZGRyZXNzIjoiMTAwLjY1LjE2MC4yMTIifQ.kEqpWbzv6N1OwuOacivLlj1Caby8c2oC6yiTTFoLIi_zCMAJScJTpny8fse39w37MOY5d5MeaVKD5CrvmIvOrcpBfHLrLeTd5russpFstv-DFepCi6lHdFFer-SDOo97ly2brW9clUYZxK1bZccZ-uawT2h8iAGf8dns432wZ1J06PZ3q92h8YhGSikU0NID8BgCSV1cdXO9ht8O3bUOb-uoq_Ipz9YUYuTxFr-1G9IcAXs2lVEMW0VnWKpaxG7iPsnIJz0d-qpvEpgf0fYMuEqKUvkz5c-lbnL4DJBsuHfeXsyzU4AtGe2r-DuM5syykgkbexDnoAPdqHQiCakCzg";
         string requestId = Guid.NewGuid().ToString();
         string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
 
-        string authorizationToken = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE3NDI1NTgwODksImlhdCI6MTc0MjU1Njg4OSwianRpIjoiZmU0NGZmYmYtYTc2NC00NDkwLTg4NjctNWVjYjBjODJkYjcxIiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6WyJhY2NvdW50IiwiU0JYVElEXzAwNjU3NiJdLCJzdWIiOiJlNmZhMjIyOC1hNTQ0LTQzYWQtYjYzNi1mZGY1NTU2M2VhMWIiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhJRF8wMDkxMjUiLCJzZXNzaW9uX3N0YXRlIjoiNDJkZjk4MmItNzAwNS00M2JkLWI1NGYtZTcyYzk3YTk0OWQ2IiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjkwMDciXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIkRJR0lfRE9DVE9SIiwiaGZyIiwiaGl1Iiwib2ZmbGluZV9hY2Nlc3MiLCJoZWFsdGhJZCIsInBociIsIk9JREMiLCJoZWFsdGhfbG9ja2VyIiwiaGlwIiwiSGlkQWJoYVNlYXJjaCIsImhwX2lkIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19LCJTQlhJRF8wMDkxMjUiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sIlNCWFRJRF8wMDY1NzYiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiY2xpZW50SWQiOiJTQlhJRF8wMDkxMjUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImNsaWVudEhvc3QiOiIxMDAuNjUuMTYwLjIxMiIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1zYnhpZF8wMDkxMjUiLCJjbGllbnRBZGRyZXNzIjoiMTAwLjY1LjE2MC4yMTIifQ.Uj9MhImk0ASUzr8EFZaxBwbmhHFvJ4JYtZbCXotyH8Cnk3Zg7u66EEwrS4jIBoFiFm4aLLet_JuH2padFs4sCORDkYeQ6T1gZI5tjMnExs-Wn9p7jwpGONU5-JNbSfp3SVntcLxK0Ov073a_-segSQQPl17fDvr1TGm2d9fd3U0B_hxjmWWJNpjIdZ5rgIBIJqf4jTQIfuIfLGE7fwSUWrZZP77IvtL1GxrUYexSGVtegFYbyBIqtVNClYiltHv1lEuma5AScjYyr15mFd3sHUVKmma_XFi2EQWYqh_g9ep9ytqWu7sAutqdDd6D4fUKS740iPMz67U3Y-FGBLglfQ";
-        //retreive the authorization token from the environment variable which is acces_token env variable
-        //string? authorizationToken = Environment.GetEnvironmentVariable("ACCESS_TOKEN");
+        Console.WriteLine($"🔒 Encrypted Mobile Number: {encryptedMobile}");
+        Console.WriteLine($"🔑 HARD-CODED ACCESS_TOKEN: {accessToken}");
+        Console.WriteLine($"📌 REQUEST-ID: {requestId}");
+        Console.WriteLine($"📌 TIMESTAMP: {timestamp}");
 
-        var requestBody = new
+        var requestData = new
         {
             scope = new[] { "abha-login", "mobile-verify" },
             loginHint = "mobile",
-            loginId = "VP+yXwxA+ppl5ktgO6tnofgjyXMHHjV3GG4HSMokL62xKTZJAznpR2524F2tQfS5DtRHca7NZi8KVX+C4HOvJbFdTY1URG8TemZTiIF5SjHmBzBvrkNFHJ29X/Z4IkajTKkP8XCMp6BskxOwGfycy4o5RIJvSxw1Mb/CSfg/79qdJd1V/yHx7rRqXTQcMfSpXFZLQB8Dpu3vPDoaMPzQtZ8OnH3jgy4+Id4iuPKEaKl7XiKuGv2BJSlJ2Q/Od5CFKyA/rRcGpouqAu3esiy+wZz7xPaQ/IMuWfXrKpZ+pPcZwZEglGT6v6i3j+39Hjatc4/kQxjrzv8CQ1AytXyvh0wQPwQ3s54vZ1mZocmx89kCYKy4m4f5fNsEyaQVkwrDi1K2sspFiDLKe4rXtnemPSR/b93yLr0OTXlzwD+j7pYbH+dupKq2WJ863JotHDoLiBvyOYGLheQP5gXdQQVqmqEHrLmpx6znKY5j6Ehv6uuNwl4Tr4wUq/xLs8I5Mcz1M2g7uoIdBWtiR5ejrXJT+OaO/Xt9LzDbHxrPf59is4KYj9liQE+HBJmJXe4YHW1PNJmgiid7FstK40ylWjbkEIKr0kWLig+2LRRg6Q2llj1GVmtNSMXOKSlhtzDqMR4zm8PYI2cUBppJqjCRQsVWxovr5249yHag7cB7EZUrZXU=",
+            loginId = encryptedMobile,
             otpSystem = "abdm"
         };
 
-        string jsonBody = JsonConvert.SerializeObject(requestBody);
-
-        using (HttpClient client = new HttpClient())
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://abhasbx.abdm.gov.in/abha/api/v3/profile/login/request/otp")
         {
-            client.DefaultRequestHeaders.Add("REQUEST-ID", requestId);
-            client.DefaultRequestHeaders.Add("TIMESTAMP", timestamp);
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorizationToken);
+            Content = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
+        };
 
-            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-            HttpResponseMessage response = await client.PostAsync(url, content);
+        request.Headers.Add("REQUEST-ID", requestId);
+        request.Headers.Add("TIMESTAMP", timestamp);
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
 
-            string responseString = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("Response:");
-            Console.WriteLine(responseString);
+        var response = await client.SendAsync(request);
+        string responseString = await response.Content.ReadAsStringAsync();
 
-            // Extract txnId and store it in an environment variable
-            var jsonResponse = JObject.Parse(responseString);
-            if (jsonResponse["txnId"] != null)
-            {
-                string txnId = jsonResponse["txnId"].ToString();
-                Environment.SetEnvironmentVariable("TXN_ID", txnId);
-                Console.WriteLine($"Transaction ID stored in environment variable: {txnId}");
-            }
-            else
-            {
-                Console.WriteLine("txnId not found in response.");
-            }
+        Console.WriteLine($"📩 Response: {responseString}");
+
+        // Extract and store txnId
+        var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+        if (jsonResponse != null && jsonResponse.ContainsKey("txnId"))
+        {
+            configData["TXN_ID"] = jsonResponse["txnId"];
+            SaveConfig(configData);
+            Console.WriteLine("✅ txnId stored in config.json");
         }
+        else
+        {
+            Console.WriteLine("❌ Failed to extract txnId from response.");
+        }
+    }
+
+    // 📌 Verify OTP API Call (Debugging Mode with Hardcoded Access Token)
+    static async Task VerifyOtp()
+    {
+        Dictionary<string, string> configData = LoadConfig();
+
+        if (!configData.ContainsKey("ENCRYPTED_OTP") || !configData.ContainsKey("TXN_ID"))
+        {
+            Console.WriteLine("❌ Encrypted OTP or TXN_ID not found in config.json.");
+            return;
+        }
+
+        string encryptedOtp = configData["ENCRYPTED_OTP"];
+        string txnId = configData["TXN_ID"];
+
+        // 🔥 Hardcoded Access Token (Replace with actual token for debugging)
+        string accessToken = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBbFJiNVdDbThUbTlFSl9JZk85ejA2ajlvQ3Y1MXBLS0ZrbkdiX1RCdkswIn0.eyJleHAiOjE3NDI2MjQwMDgsImlhdCI6MTc0MjYyMjgwOCwianRpIjoiYjZhYTA0MGYtODc5Yi00OWEwLWExNWEtM2Q1ODhhNWE1ODZhIiwiaXNzIjoiaHR0cHM6Ly9kZXYubmRobS5nb3YuaW4vYXV0aC9yZWFsbXMvY2VudHJhbC1yZWdpc3RyeSIsImF1ZCI6WyJhY2NvdW50IiwiU0JYVElEXzAwNjU3NiJdLCJzdWIiOiJlNmZhMjIyOC1hNTQ0LTQzYWQtYjYzNi1mZGY1NTU2M2VhMWIiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJTQlhJRF8wMDkxMjUiLCJzZXNzaW9uX3N0YXRlIjoiZDBiNDlkYjUtNTdhYy00YmNkLWJiY2YtMWRiMDRlYzhkNzllIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjkwMDciXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIkRJR0lfRE9DVE9SIiwiaGZyIiwiaGl1Iiwib2ZmbGluZV9hY2Nlc3MiLCJoZWFsdGhJZCIsInBociIsIk9JREMiLCJoZWFsdGhfbG9ja2VyIiwiaGlwIiwiSGlkQWJoYVNlYXJjaCIsImhwX2lkIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19LCJTQlhJRF8wMDkxMjUiOnsicm9sZXMiOlsidW1hX3Byb3RlY3Rpb24iXX0sIlNCWFRJRF8wMDY1NzYiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6Im9wZW5pZCBlbWFpbCBwcm9maWxlIiwiY2xpZW50SWQiOiJTQlhJRF8wMDkxMjUiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImNsaWVudEhvc3QiOiIxMDAuNjUuMTYwLjIxMiIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1zYnhpZF8wMDkxMjUiLCJjbGllbnRBZGRyZXNzIjoiMTAwLjY1LjE2MC4yMTIifQ.kEqpWbzv6N1OwuOacivLlj1Caby8c2oC6yiTTFoLIi_zCMAJScJTpny8fse39w37MOY5d5MeaVKD5CrvmIvOrcpBfHLrLeTd5russpFstv-DFepCi6lHdFFer-SDOo97ly2brW9clUYZxK1bZccZ-uawT2h8iAGf8dns432wZ1J06PZ3q92h8YhGSikU0NID8BgCSV1cdXO9ht8O3bUOb-uoq_Ipz9YUYuTxFr-1G9IcAXs2lVEMW0VnWKpaxG7iPsnIJz0d-qpvEpgf0fYMuEqKUvkz5c-lbnL4DJBsuHfeXsyzU4AtGe2r-DuM5syykgkbexDnoAPdqHQiCakCzg";
+
+        string requestId = Guid.NewGuid().ToString();
+        string timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ");
+
+        Console.WriteLine($"🔑 HARD-CODED ACCESS_TOKEN: {accessToken}");
+        Console.WriteLine($"📌 REQUEST-ID: {requestId}");
+        Console.WriteLine($"📌 TIMESTAMP: {timestamp}");
+        Console.WriteLine($"🔒 ENCRYPTED OTP: {encryptedOtp}");
+        Console.WriteLine($"🔄 TXN_ID: {txnId}");
+
+        var requestData = new
+        {
+            scope = new[] { "abha-login", "mobile-verify" },
+            authData = new
+            {
+                authMethods = new[] { "otp" },
+                otp = new
+                {
+                    txnId = txnId,
+                    otpValue = encryptedOtp
+                }
+            }
+        };
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://abhasbx.abdm.gov.in/abha/api/v3/profile/login/verify")
+        {
+            Content = new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
+        };
+
+        request.Headers.Add("REQUEST-ID", requestId);
+        request.Headers.Add("TIMESTAMP", timestamp);
+        request.Headers.Add("Authorization", $"Bearer {accessToken}");
+
+        var response = await client.SendAsync(request);
+        string responseString = await response.Content.ReadAsStringAsync();
+
+        Console.WriteLine($"📩 Response: {responseString}");
+
+        // Extract and store jwtToken
+        var jsonResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(responseString);
+        if (jsonResponse != null && jsonResponse.ContainsKey("token"))
+        {
+            configData["JWT_TOKEN"] = jsonResponse["token"];
+            SaveConfig(configData);
+            Console.WriteLine("✅ jwtToken stored in config.json");
+        }
+        else
+        {
+            Console.WriteLine("❌ Failed to extract jwtToken from response.");
+        }
+    }
+
+    // 📌 Verify User API Call
+    static async Task VerifyUser()
+    {
+        Dictionary<string, string> configData = LoadConfig();
+
+        if (!configData.ContainsKey("ABHA_NUMBER") || !configData.ContainsKey("TXN_ID"))
+        {
+            Console.WriteLine("❌ ABHA number or TXN_ID not found in config.json.");
+            return;
+        }
+
+        var requestData = new
+        {
+            ABHANumber = configData["ABHA_NUMBER"],
+            txnId = configData["TXN_ID"]
+        };
+
+        var response = await client.PostAsync(
+            "https://abhasbx.abdm.gov.in/abha/api/v3/profile/login/verify/user",
+            new StringContent(JsonConvert.SerializeObject(requestData), Encoding.UTF8, "application/json")
+        );
+
+        string responseString = await response.Content.ReadAsStringAsync();
+        Console.WriteLine(responseString);
+    }
+
+    // 📌 Encrypt Data using RSA
+    static string RSAEncrypt(string text, string publicKeyPem)
+    {
+        using (var rsa = RSA.Create())
+        {
+            rsa.ImportSubjectPublicKeyInfo(Convert.FromBase64String(publicKeyPem), out _);
+            byte[] encryptedBytes = rsa.Encrypt(Encoding.UTF8.GetBytes(text), RSAEncryptionPadding.OaepSHA1);
+            return Convert.ToBase64String(encryptedBytes);
+        }
+    }
+
+    // 📌 Retrieve Public Key from Environment Variables
+    static string GetPublicKey()
+    {
+        return Environment.GetEnvironmentVariable("PUBLIC_KEY", EnvironmentVariableTarget.User);
+    }
+
+    // 📌 Load Data from config.json
+    static Dictionary<string, string> LoadConfig()
+    {
+        if (!File.Exists(configFilePath))
+            return new Dictionary<string, string>();
+
+        string json = File.ReadAllText(configFilePath);
+        return JsonConvert.DeserializeObject<Dictionary<string, string>>(json) ?? new Dictionary<string, string>();
+    }
+
+    // 📌 Save Data to config.json
+    static void SaveConfig(Dictionary<string, string> configData)
+    {
+        string json = JsonConvert.SerializeObject(configData, Formatting.Indented);
+        File.WriteAllText(configFilePath, json);
     }
 }
