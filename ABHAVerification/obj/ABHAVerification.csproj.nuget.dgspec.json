@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\GitHub\\AbhaIntegration\\ABHAVerification\\ABHAVerification.csproj": {}
+    "C:\\GitHub\\ABHAINTEGRATION\\ABHAVerification\\ABHAVerification.csproj": {}
   },
   "projects": {
-    "C:\\GitHub\\AbhaIntegration\\ABHAVerification\\ABHAVerification.csproj": {
+    "C:\\GitHub\\ABHAINTEGRATION\\ABHAVerification\\ABHAVerification.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\GitHub\\AbhaIntegration\\ABHAVerification\\ABHAVerification.csproj",
+        "projectUniqueName": "C:\\GitHub\\ABHAINTEGRATION\\ABHAVerification\\ABHAVerification.csproj",
         "projectName": "ABHAVerification",
-        "projectPath": "C:\\GitHub\\AbhaIntegration\\ABHAVerification\\ABHAVerification.csproj",
+        "projectPath": "C:\\GitHub\\ABHAINTEGRATION\\ABHAVerification\\ABHAVerification.csproj",
         "packagesPath": "C:\\Users\\mizh4\\.nuget\\packages\\",
-        "outputPath": "C:\\GitHub\\AbhaIntegration\\ABHAVerification\\obj\\",
+        "outputPath": "C:\\GitHub\\ABHAINTEGRATION\\ABHAVerification\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mizh4\\AppData\\Roaming\\NuGet\\NuGet.Config"
