@@ -52,6 +52,10 @@
               "target": "Package",
               "version": "[9.0.3, )"
             },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "RestSharp": {
               "target": "Package",
               "version": "[112.1.0, )"
