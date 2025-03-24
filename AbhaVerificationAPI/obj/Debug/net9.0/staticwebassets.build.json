@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "HNb52cejfr2JBqNqDL0alppA+r4Xv1hb+F3JTCqZqo4=",
+  "Source": "AbhaVerificationAPI",
+  "BasePath": "_content/AbhaVerificationAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

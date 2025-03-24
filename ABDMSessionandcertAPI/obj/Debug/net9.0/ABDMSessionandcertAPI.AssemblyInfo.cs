@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ABDMSessionandcertAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+99d39688d6a08c882271f0f4c77379794fc526fe")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1437054ba4422838e585ba55fecfeff569c3c4cf")]
 [assembly: System.Reflection.AssemblyProductAttribute("ABDMSessionandcertAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ABDMSessionandcertAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
