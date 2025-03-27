@@ -1,68 +1,93 @@
 using System;
+using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
-using AbhaVerificationApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
-namespace AbhaVerificationApi.Services
+namespace AbhaIntegration.Services
 {
     public class VerifyService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _abhaBaseUrl = "https://abhasbx.abdm.gov.in/abha/api/v3/profile/login";
+        private readonly dynamic _config;
 
         public VerifyService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            string configPath = "C:\\GitHub\\AbhaIntegration\\AbhaEncryptionConsole\\config.json";
+            _config = JsonConvert.DeserializeObject(File.ReadAllText(configPath));
         }
 
-        private void AddCommonHeaders(HttpRequestMessage request)
+        private string GetEncryptedMobileNumber()
         {
-            request.Headers.Add("REQUEST-ID", Guid.NewGuid().ToString());
-            request.Headers.Add("TIMESTAMP", DateTime.UtcNow.ToString("o"));
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "your_api_token_here");
-        }
+            string encryptedMobile = _config?.ENCRYPTED_MOBILE_NUMBER;
 
-        public async Task<string> RequestOtp(OtpRequest otpRequest)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{_abhaBaseUrl}/request/otp")
+            if (string.IsNullOrEmpty(encryptedMobile))
             {
-                Content = new StringContent(JsonSerializer.Serialize(otpRequest), Encoding.UTF8, "application/json")
-            };
-            AddCommonHeaders(request);
+                Console.WriteLine("⚠️ ERROR: Encrypted mobile number not found in config.json!");
+                throw new Exception("Encrypted mobile number is missing in the configuration.");
+            }
 
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"📞 ENCRYPTED_MOBILE_NUMBER: {encryptedMobile}");
+            return encryptedMobile;
         }
 
-        public async Task<string> VerifyOtp(OtpVerifyRequest otpVerifyRequest)
+        private string GetAccessToken()
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{_abhaBaseUrl}/verify")
-            {
-                Content = new StringContent(JsonSerializer.Serialize(otpVerifyRequest), Encoding.UTF8, "application/json")
-            };
-            AddCommonHeaders(request);
+            // Try getting from environment variable
+            string accessToken = Environment.GetEnvironmentVariable("accesstoken", EnvironmentVariableTarget.User);
 
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+            // If missing, check access_token.txt file
+            if (string.IsNullOrEmpty(accessToken) && File.Exists("access_token.txt"))
+            {
+                accessToken = File.ReadAllText("access_token.txt").Trim();
+            }
+
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                throw new Exception("❌ Error: Access token is missing. Run 'sess' first to obtain it.");
+            }
+
+            Console.WriteLine($"🔑 Using Access Token: {accessToken}");
+            return accessToken;
         }
 
-        public async Task<string> VerifyAbhaUser(AbhaVerifyRequest abhaVerifyRequest, string token)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{_abhaBaseUrl}/verify/user")
-            {
-                Content = new StringContent(JsonSerializer.Serialize(abhaVerifyRequest), Encoding.UTF8, "application/json")
-            };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            AddCommonHeaders(request);
 
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+
+        public async Task<string> SendOtpRequest()
+        {
+            string encryptedMobile = GetEncryptedMobileNumber();
+            string accessToken = GetAccessToken();
+            string requestId = Guid.NewGuid().ToString();
+            string timestamp = DateTime.UtcNow.ToString("o");
+
+            var requestBody = new
+            {
+                scope = new[] { "abha-login", "mobile-verify" },
+                loginHint = "mobile",
+                loginId = encryptedMobile,
+                otpSystem = "abdm"
+            };
+            var content = new StringContent(JsonConvert.SerializeObject(requestBody), Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {accessToken}");
+            _httpClient.DefaultRequestHeaders.Add("REQUEST-ID", requestId);
+            _httpClient.DefaultRequestHeaders.Add("TIMESTAMP", timestamp);
+
+            Console.WriteLine("📡 Sending OTP request...");
+            HttpResponseMessage response = await _httpClient.PostAsync("https://abhasbx.abdm.gov.in/abha/api/v3/profile/login/request/otp", content);
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("🔄 Response: " + responseBody);
+
+            var jsonResponse = JObject.Parse(responseBody);
+            string txnId = jsonResponse["txnId"]?.ToString();
+            Console.WriteLine("📌 Transaction ID: " + txnId);
+
+            return responseBody;
         }
     }
 }

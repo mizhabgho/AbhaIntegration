@@ -51,3 +51,6 @@ C:\GitHub\AbhaIntegration\AbhaVerificationAPI\obj\Debug\net9.0\refint\AbhaVerifi
 C:\GitHub\AbhaIntegration\AbhaVerificationAPI\obj\Debug\net9.0\AbhaVerificationAPI.pdb
 C:\GitHub\AbhaIntegration\AbhaVerificationAPI\obj\Debug\net9.0\AbhaVerificationAPI.genruntimeconfig.cache
 C:\GitHub\AbhaIntegration\AbhaVerificationAPI\obj\Debug\net9.0\ref\AbhaVerificationAPI.dll
+C:\GitHub\AbhaIntegration\AbhaVerificationAPI\bin\Debug\net9.0\Microsoft.AspNetCore.JsonPatch.dll
+C:\GitHub\AbhaIntegration\AbhaVerificationAPI\bin\Debug\net9.0\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
+C:\GitHub\AbhaIntegration\AbhaVerificationAPI\bin\Debug\net9.0\Newtonsoft.Json.Bson.dll

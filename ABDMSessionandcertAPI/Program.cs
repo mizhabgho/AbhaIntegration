@@ -75,8 +75,8 @@ class Program
 
                 if (!string.IsNullOrEmpty(accessToken))
                 {
-                    Environment.SetEnvironmentVariable("ACCESS_TOKEN", accessToken, EnvironmentVariableTarget.User);
-                    Console.WriteLine("✅ Access Token saved to environment variable 'ACCESS_TOKEN'");
+                    Environment.SetEnvironmentVariable("accesstoken", accessToken, EnvironmentVariableTarget.User);
+                    Console.WriteLine("✅ Access Token saved to environment variable 'accesstoken'");
                 }
             }
             else
@@ -96,7 +96,7 @@ class Program
         string ApiUrl = "https://abhasbx.abdm.gov.in/abha/api/v3/profile/public/certificate";
 
         // Try reading token from file if environment variable is missing
-        string accessToken = Environment.GetEnvironmentVariable("ACCESS_TOKEN", EnvironmentVariableTarget.User);
+        string accessToken = Environment.GetEnvironmentVariable("accesstoken", EnvironmentVariableTarget.User);
         if (string.IsNullOrEmpty(accessToken) && File.Exists("access_token.txt"))
         {
             accessToken = File.ReadAllText("access_token.txt").Trim();
@@ -135,9 +135,9 @@ class Program
                 if (doc.RootElement.TryGetProperty("publicKey", out JsonElement publicKeyElement))
                 {   
                     string publicKey = publicKeyElement.GetString();
-                    Environment.SetEnvironmentVariable("PUBLIC_KEY", publicKey, EnvironmentVariableTarget.User);
+                    Environment.SetEnvironmentVariable("publicKey", publicKey, EnvironmentVariableTarget.User);
 
-                    Console.WriteLine("✅ Public key saved to environment variable 'PUBLIC_KEY'");
+                    Console.WriteLine("✅ Public key saved to environment variable 'publicKey'");
                 }
                 else
                 {
